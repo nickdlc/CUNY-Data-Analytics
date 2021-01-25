@@ -46,13 +46,36 @@ def select_all(conn, stmt):
     pre: conn is a sqlite3 connection, stmt is a SQL statement
     post: prints each row in the table denoted in stmt
     '''
-    cursor = conn.cursor()
-    cursor.execute(stmt)
+    try:
+        cursor = conn.cursor()
+        cursor.execute(stmt)
 
-    rows = cursor.fetchall()
+        # Gets all columns and prints the list
+        cols = list(map(lambda x: x[0], cursor.description))
+        print(cols)
 
-    for row in rows:
-        print(row)
+        # Gets all rows and prints each of them
+        rows = cursor.fetchall()
+        for row in rows:
+            print(row)
+    except:
+        print('Unable to select all in table')
+
+def inner_join(conn, stmt):
+    try:
+        cursor = conn.cursor()
+        cursor.execute(stmt)
+
+        # Gets all columns satisfying the inner join and prints the list
+        cols = list(map(lambda x: x[0], cursor.description))
+        print(cols)
+
+        # Gets all rows satisfying the inner join and prints each of them
+        rows = cursor.fetchall()
+        for row in rows:
+            print(row)
+    except:
+        print('Unable to get inner join')
 
 conn = create_connection()
 
@@ -115,5 +138,11 @@ if add_review.upper() == 'Y':
 
         if input('Would you like to review another video [Y/N]? ').upper() != 'Y':
             more = False
+
+inner_join_stmt = '''SELECT videos.video_id, videos.title, videos.length, reviewers.username, reviewers.review, reviewers.rating
+                     FROM reviewers
+                     INNER JOIN videos ON videos.video_id = reviewers.video_id'''
+
+inner_join(conn, inner_join_stmt)
 
 conn.close()
